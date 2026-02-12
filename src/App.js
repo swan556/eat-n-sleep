@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const initialFriends = [
   {
     id: 118836,
@@ -19,13 +21,31 @@ const initialFriends = [
   },
 ];
 
+function Button({ children, onClick }) {
+  return (
+    <button className="button" onClick={onClick}>
+      {children}
+    </button>
+  );
+}
+
 export default function App() {
+  const [friendList, setFL] = useState(initialFriends);
+  function handleFriendList(newFriend) {
+    setFL((fl) => [...fl, newFriend]);
+  }
+  const [showAddFriend, setSAF] = useState(false);
+  function handleShow() {
+    setSAF((show) => !show);
+  }
   return (
     <div className="app">
       <div className="sidebar">
         <FriendList />
-        <FormAddFriend />
-        <Button>Add Friend</Button>
+        {showAddFriend && <FormAddFriend handleFriendList={handleFriendList} />}
+        <Button onClick={handleShow}>
+          {!showAddFriend ? "Add Friend" : "close"}
+        </Button>
       </div>
       <FormSplitBill />
     </div>
@@ -66,19 +86,30 @@ function Friend({ friend }) {
   );
 }
 
-function Button({ children }) {
-  return <button className="button">{children}</button>;
-}
+function FormAddFriend({ handleFriendList }) {
+  const [newFriendName, setNFN] = useState("");
+  let random_url = `https://i.pravatar.cc/48?u=${String(Math.round(Math.random() * Math.pow(10, Math.random() * 6)))}`;
 
-function FormAddFriend() {
+  function addFriendFn() {
+    handleFriendList({
+      id: Date.now(),
+      name: newFriendName,
+      image: random_url,
+      balance: 0,
+    });
+  }
   return (
-    <form className="form-add-friend">
-      <labl>Friend Name</labl>
-      <input type="text" />
+    <form className="form-add-friend" onSubmit={(e) => e.preventDefault()}>
+      <label>Friend Name</label>
+      <input
+        type="text"
+        value={newFriendName}
+        onChange={(e) => {
+          setNFN(e.target.value);
+        }}
+      />
 
-      <label>Image URL</label>
-      <input type="text" />
-      <Button>Add</Button>
+      <Button onClick={() => addFriendFn()}>Add</Button>
     </form>
   );
 }
